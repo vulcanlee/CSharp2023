@@ -7,6 +7,9 @@ using MathNet.Numerics.LinearAlgebra;
 
 namespace OpenAIHelloEmbedding;
 
+/// <summary>
+/// 使用 OpenAI Embedding 技術，進行文字內容搜尋
+/// </summary>
 internal class Program
 {
     static async Task Main(string[] args)
