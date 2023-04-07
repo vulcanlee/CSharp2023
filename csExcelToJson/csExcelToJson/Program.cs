@@ -17,7 +17,12 @@ internal class Program
 {
     static async Task Main(string[] args)
     {
-        List<string> jsons = ExcelToJsons();
+        List<string> jsons = new List<string>();
+        string filename = Path.Combine(Directory.GetCurrentDirectory(), "Embedding.json");
+        bool generateEmbeddingDataFile = true;
+
+        if (File.Exists(filename)) generateEmbeddingDataFile = false;
+        else generateEmbeddingDataFile = true;
 
         #region 建立 OpenAiOptions 物件，用來標明此次呼叫 API 的類型與授權資訊
         // 這邊使用 Environment.GetEnvironmentVariable() 來取得環境變數，也可以直接使用字串
@@ -31,19 +36,37 @@ internal class Program
         });
         #endregion
 
-        #region 建立文件庫文字的 Embedding
+        Dictionary<string, List<double>> allStorageEmbedding = new();
         Dictionary<string, Vector<double>> allDocumentsEmbedding = new();
-        int index = 2;
-        foreach (var library in jsons)
+
+        if (generateEmbeddingDataFile)
         {
-            var docEmbedding = await GetEmbedding(openAITextEmbedding, library);
-            allDocumentsEmbedding.Add(index.ToString(), docEmbedding);
-            index++;
+            jsons = ExcelToJsons();
+            #region 建立文件庫文字的 Embedding
+            int index = 2;
+            allDocumentsEmbedding.Clear();
+            foreach (var library in jsons)
+            {
+                var docEmbedding = await GetEmbedding(openAITextEmbedding, library);
+                allDocumentsEmbedding.Add(index.ToString(), docEmbedding);
+                allStorageEmbedding.Add(index.ToString(), docEmbedding.ToList());
+                await Console.Out.WriteAsync($"{index} ");
+                index++;
+            }
 
-            string json = JsonConvert.SerializeObject(docEmbedding);
-            var embeddedObject = JsonConvert.DeserializeObject<List<double>>(json);
-
-            break;
+            #region 準備將 Embedding Vector 系列化成為 JSON，並且寫入到檔案內
+            string json = JsonConvert.SerializeObject(allStorageEmbedding);
+            await File.WriteAllTextAsync(filename, json);
+            #endregion
+        }
+        else
+        {
+            string json = await File.ReadAllTextAsync(filename);
+            var embeddedObject = JsonConvert.DeserializeObject<Dictionary<string, List<double>>>(json);
+            foreach (var item in embeddedObject)
+            {
+                allDocumentsEmbedding.Add(item.Key, Vector<double>.Build.DenseOfArray(item.Value.ToArray()));
+            }
         }
         #endregion
 
@@ -54,6 +77,7 @@ internal class Program
             string question = Console.ReadLine();
 
             if (question.ToLower().Trim() == "quit") break;
+            if (question.ToLower().Trim() == "") continue;
 
             var questionEmbedding = await GetEmbedding(openAITextEmbedding, question);
             #endregion
@@ -112,7 +136,8 @@ internal class Program
     private static List<string> ExcelToJsons()
     {
         string currentPath = System.IO.Directory.GetCurrentDirectory();
-        string filename = "sample.xlsx";
+        //string filename = "sample.xlsx";
+        string filename = "20230407 falcon.xlsx";
         string filePath = System.IO.Path.Combine(currentPath, filename);
         string sheetName = "Grid Results";
         var jsons = ConvertExcelToJson(filePath, sheetName);
