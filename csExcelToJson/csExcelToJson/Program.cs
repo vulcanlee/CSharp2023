@@ -32,7 +32,7 @@ internal class Program
 
         #region 建立文件庫文字的 Embedding
         Dictionary<string, Vector<double>> allDocumentsEmbedding = new();
-        int index = 1;
+        int index = 2;
         foreach (var library in jsons)
         {
             var docEmbedding = await GetEmbedding(openAITextEmbedding, library);
@@ -106,7 +106,7 @@ internal class Program
     private static List<string> ExcelToJsons()
     {
         string currentPath = System.IO.Directory.GetCurrentDirectory();
-        string filename = "20230407 falcon.xlsx";
+        string filename = "sample.xlsx";
         string filePath = System.IO.Path.Combine(currentPath, filename);
         string sheetName = "Grid Results";
         var jsons = ConvertExcelToJson(filePath, sheetName);
