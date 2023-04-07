@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿
+using System.Xml;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -38,6 +39,11 @@ internal class Program
             var docEmbedding = await GetEmbedding(openAITextEmbedding, library);
             allDocumentsEmbedding.Add(index.ToString(), docEmbedding);
             index++;
+
+            string json = JsonConvert.SerializeObject(docEmbedding);
+            var embeddedObject = JsonConvert.DeserializeObject<List<double>>(json);
+
+            break;
         }
         #endregion
 
