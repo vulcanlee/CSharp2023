@@ -37,12 +37,12 @@ internal class Program
         #region 建立文件庫文字的 Embedding
         List<string> allLibrary = new List<string>()
         {
-            "敏捷的棕色狐狸跳過了懶狗",
-            "一天一蘋果，醫生遠離我",
-            "存在還是不存在，這是個問題",
-            //"The quick brown fox jumps over the lazy dog.",
-            //"Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            //"The cat in the hat."
+            //"敏捷的棕色狐狸跳過了懶狗",
+            //"一天一蘋果，醫生遠離我",
+            //"存在還是不存在，這是個問題",
+            "The quick brown fox jumps over the lazy dog",
+            "An apple a day keeps the doctor away",
+            "To be or not to be, that is the question" ,
         };
         Dictionary<string, Vector<double>> allDocumentsEmbedding = new();
         foreach (var library in allLibrary)
