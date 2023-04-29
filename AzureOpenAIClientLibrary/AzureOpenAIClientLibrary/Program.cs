@@ -12,7 +12,7 @@ internal class Program
     {
         #region 使用 Azure.AI.OpenAI 套件來 OpenAIClient 物件
         var apiKey = Environment.GetEnvironmentVariable("OpenAIKey");
-        string endpoint = "https://vulcan-openai.openai.azure.com/";
+        string endpoint = "https://openailabtw.openai.azure.com/";
         var client = new OpenAIClient(new Uri(endpoint), new AzureKeyCredential(apiKey));
         #endregion
 
