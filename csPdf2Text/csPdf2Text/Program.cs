@@ -1,6 +1,10 @@
-﻿using iTextSharp.text.pdf;
-using iTextSharp.text.pdf.parser;
-using System.Reflection.PortableExecutable;
+﻿using System;
+using System.IO;
+using System.Text;
+using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas.Parser;
+using iText.Kernel.Pdf.Canvas.Parser.Listener;
+using System.Text;
 
 namespace csPdf2Text
 {
@@ -8,24 +12,24 @@ namespace csPdf2Text
     {
         static void Main(string[] args)
         {
-            // creating a pdf reader object
-            PdfReader reader = new PdfReader("synapse_pacs.pdf");
-            // printing number of pages in pdf file
-            Console.WriteLine("Number of pages: " + reader.NumberOfPages);
+            StringBuilder result = new StringBuilder();
 
-            for (int i = 1; i <= reader.NumberOfPages; i++)
+            using (PdfReader pdfReader = new PdfReader("synapse_pacs.pdf"))
             {
-                Console.WriteLine($"------------------------------- Page:{i}");
-                // getting a specific page from the pdf file
-                PdfDictionary page = reader.GetPageN(i);
+                using (PdfDocument pdfDoc = new PdfDocument(pdfReader))
+                {
+                    int numberOfPages = pdfDoc.GetNumberOfPages();
 
-                // extracting text from page
-                string text = PdfTextExtractor.GetTextFromPage(reader, i, new LocationTextExtractionStrategy());
-                Console.WriteLine(text);
+                    for (int i = 1; i <= numberOfPages; i++)
+                    {
+                        ITextExtractionStrategy strategy = new SimpleTextExtractionStrategy();
+                        string pageContent = PdfTextExtractor.GetTextFromPage(pdfDoc.GetPage(i), strategy);
+                        result.AppendLine(pageContent);
+                    }
+                }
             }
 
-            // closing the reader
-            reader.Close();
+            Console.WriteLine(result.ToString());
         }
     }
 }
