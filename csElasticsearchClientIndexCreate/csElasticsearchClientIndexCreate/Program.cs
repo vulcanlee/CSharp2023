@@ -1,4 +1,5 @@
 ﻿using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.QueryDsl;
 using Newtonsoft.Json;
 
 namespace csElasticsearchClientIndexCreate
@@ -58,10 +59,15 @@ namespace csElasticsearchClientIndexCreate
             bulkAll.Wait(TimeSpan.FromMinutes(10), r=>Console.WriteLine("data indexed"));
             #endregion
 
+            var sq = new ScriptQuery
+            {
+                QueryName = "name_query",
+                Boost = 1.1f,
+                Script = new InlineScript
+            };
             #region 使用 Consine 進行相似性搜尋
             var cosineResponse = await client.SearchAsync<DocumentationChunk>(s => s
             .Index(IndexName)
-            .Query(q=>q
             );
             #endregion
         }
