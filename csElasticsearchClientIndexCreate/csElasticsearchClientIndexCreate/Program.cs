@@ -1,6 +1,7 @@
-﻿using Elastic.Clients.Elasticsearch;
-using Elastic.Clients.Elasticsearch.QueryDsl;
+﻿//using Elastic.Clients.Elasticsearch;
+using Nest;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace csElasticsearchClientIndexCreate
 {
@@ -11,64 +12,86 @@ namespace csElasticsearchClientIndexCreate
             // Create an index
             const string IndexName = "gpt_embedding";
             Uri HostUri = new Uri("http://192.168.82.7:9200");
+            bool RecreateIndex = false;
 
             // Create a client settings object
-            var settings = new ElasticsearchClientSettings(HostUri);
+            var settings = new ConnectionSettings(HostUri)
+                        .DefaultIndex(IndexName)  // 你的索引名稱
+                        .DisableDirectStreaming(); // 關閉直接串流
+
             // Create a client object from settings
-            var client = new ElasticsearchClient(settings);
+            var client = new ElasticClient(settings);
 
-            #region 刪除索引
-            var deleteResponse = await client.Indices.DeleteAsync(IndexName);
-            #endregion
+            var allEmbeddingData = GetEmbeddingData();
 
-            // Check if the index exists
-            var existsResponse = await client.Indices.ExistsAsync(IndexName);
-
-            #region 檢查與建立索引
-            if (!existsResponse.Exists)
+            if (RecreateIndex)
             {
-                await Console.Out.WriteLineAsync($"沒有找到指定索引，現在開始建立");
-                var newIndexResponse = await client.Indices.CreateAsync<DocumentationChunk>(IndexName,
-                    i => i
-                    .Mappings(m => m
-                    .Properties(p => p
-                    .Text(n => n.FileName)
-                    .Text(n => n.ChunkNumber)
-                    .Keyword(n => n.Extension)
-                    .DenseVector(m => m.EmbeddingVector, m =>
-                    {
-                        m.Dims(1536);
-                        m.Similarity("dot_product");
-                        m.Index(true);
-                    })
-                    )));
+                #region 刪除索引
+                var deleteResponse = await client.Indices.DeleteAsync(IndexName);
+                #endregion
 
-                if (!newIndexResponse.IsValidResponse || newIndexResponse.Acknowledged is false)
+                // Check if the index exists
+                var existsResponse = await client.Indices.ExistsAsync(IndexName);
+
+                #region 檢查與建立索引
+                if (!existsResponse.Exists)
                 {
-                    throw new Exception("Oh no!");
+                    await Console.Out.WriteLineAsync($"沒有找到指定索引，現在開始建立");
+                    var newIndexResponse = await client.Indices.CreateAsync(IndexName,
+                        i => i
+                        .Map<DocumentationChunk>(m => m
+                        .Properties(p => p
+                        .Text(n => n.Name(s => s.FileName))
+                        .Text(n => n.Name(s => s.ChunkNumber))
+                        .Keyword(n => n.Name(s => s.Extension))
+                        .DenseVector(n => n.Name(s => s.EmbeddingVector).Dimensions(1536)))
+                        ));
+
+                    if (!newIndexResponse.IsValid || newIndexResponse.Acknowledged is false)
+                    {
+                        throw new Exception("Oh no!");
+                    }
                 }
+                #endregion
+
+                #region 新增資料
+
+                foreach (var itemEmbedding in allEmbeddingData)
+                {
+                    var insertResponse = client.Index(itemEmbedding, i => i.Index(IndexName));
+                }
+
+                #endregion
             }
-            #endregion
 
-            #region 新增資料
-            var bulkAll = client.BulkAll(GetEmbeddingData(), r => r
-            .Index(IndexName)
-            .BackOffRetries(20)
-            .BackOffTime(TimeSpan.FromSeconds(10)));
-
-            bulkAll.Wait(TimeSpan.FromMinutes(10), r=>Console.WriteLine("data indexed"));
-            #endregion
-
-            var sq = new ScriptQuery
-            {
-                QueryName = "name_query",
-                Boost = 1.1f,
-                Script = new InlineScript
-            };
             #region 使用 Consine 進行相似性搜尋
-            var cosineResponse = await client.SearchAsync<DocumentationChunk>(s => s
-            .Index(IndexName)
+            var settingsEmbeddingSearch = settings;
+            var clientEmbeddingSearch = client;
+
+            // 當你搜索向量時，你需要提供一個向量
+            var inputVector = allEmbeddingData[10].EmbeddingVector;  // 你的輸入向量
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            var searchResponse = clientEmbeddingSearch.Search<DocumentationChunk>(s => s
+                .Index(IndexName)
+                .From(0)
+                .Size(30)
+                .Query(q => q
+                    .ScriptScore(ss => ss
+                        .Query(_ => _.MatchAll())
+                        .Script(sc => sc
+                        //.Source("cosineSimilarity(params.queryVector, 'embeddingVector') + 1.0")
+                        .Source("cosineSimilarity(params.queryVector, 'embeddingVector') + 1.0")                         // 使用cosineSimilarity函數進行比較
+                            .Params(p => p
+                                .Add("queryVector", inputVector)
+                            )
+                        )
+                    )
+                )
             );
+            sw.Stop();
+            await Console.Out.WriteLineAsync($"查詢耗費時間 : {sw.ElapsedMilliseconds} ms");
             #endregion
         }
 
@@ -81,8 +104,12 @@ namespace csElasticsearchClientIndexCreate
             {
                 string embeddingText = File.ReadAllText(file);
                 var embedding = JsonConvert.DeserializeObject<float[]>(embeddingText)!;
+                if (embedding.Length != 1536)
+                {
+                    throw new Exception("Embedding length is not 1536");
+                }
                 string filename = file;
-                string chunkNumber = "";
+                string chunkNumber = "A";
                 string extension = Path.GetExtension(filename);
 
                 DocumentationChunks.Add(new DocumentationChunk
