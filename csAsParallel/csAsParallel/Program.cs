@@ -7,7 +7,6 @@
             var source = Enumerable.Range(1, 10000);
 
             var evenNums = source.AsParallel()
-                //.WithDegreeOfParallelism(40)
                 .Select(ShowInfo);
 
             Console.WriteLine($"Total {evenNums.Count()}");
