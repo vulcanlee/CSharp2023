@@ -66,11 +66,11 @@ public class MyService
     /// <summary>
     /// 注入的日誌服務物件
     /// </summary>
-    private readonly ILogger<MyService> _logger;
+    private readonly ILogger<MyService> logger;
 
     public MyService(ILogger<MyService> logger)
     {
-        _logger = logger;
+        this.logger = logger;
     }
 
     /// <summary>
@@ -80,8 +80,8 @@ public class MyService
     public async Task MyAction(string name)
     {
         // 將指定的內容寫入到日誌系統內
-        _logger.LogDebug(20, "正在進行指派工作處理! {Action}", name);
-        
+        logger.LogDebug(20, "正在進行指派工作處理! {Action}", name);
+        logger.LogTrace("-------------------------\n\n\n");
         try
         {
             // 這裡模擬在一個方法內，故意拋出一個例外異常
@@ -90,8 +90,11 @@ public class MyService
         catch (Exception ex)
         {
             // 將例外異常寫入到日誌系統內
-            _logger.LogError(ex, "已經捕捉到例外異常(Error)");
-            _logger.LogCritical(ex, "已經捕捉到例外異常(Critical)");
+            logger.LogError(ex, "已經捕捉到例外異常(Error)");
+            logger.LogTrace("-------------------------\n\n\n");
+
+            logger.LogCritical(ex, "已經捕捉到例外異常(Critical)");
+            logger.LogTrace("-------------------------\n\n\n");
         }
 
         // 模擬聚合例外異常
@@ -112,7 +115,7 @@ public class MyService
     {
         await Task.Run(() =>
         {
-            _logger.LogDebug(20, "正在進行指派工作處理! {Action}", "MyAwaitAsync");
+            logger.LogDebug(20, "正在進行指派工作處理! {Action}", "MyAwaitAsync");
             // 這裡模擬在一個非同步方法內，故意拋出一個例外異常
             throw new ArgumentException("測試用，強制拋出例外異常");
         });
@@ -145,12 +148,13 @@ public class MyService
         }
         catch (AggregateException ex)
         {
-            _logger.LogError(ex, "已經捕捉到 AggregateException 例外異常(Error)");
+            logger.LogError(ex, "已經捕捉到 AggregateException 例外異常(Error)");
             // 處理 Aggregation Exception 例外狀況
             //foreach (Exception innerException in ex.InnerExceptions)
             //{
             //    Console.WriteLine(innerException.Message);
             //}
+            logger.LogTrace("-------------------------\n\n\n");
         }
     }
 
@@ -174,7 +178,8 @@ public class MyService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "已經捕捉到 InnerException 例外異常(Error)");
+            logger.LogError(ex, "已經捕捉到 InnerException 例外異常(Error)");
+            logger.LogTrace("-------------------------\n\n\n");
         }
     }
 }
