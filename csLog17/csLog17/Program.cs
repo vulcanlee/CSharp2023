@@ -81,25 +81,33 @@ public class MyService
     {
         // 將指定的內容寫入到日誌系統內
         _logger.LogDebug(20, "正在進行指派工作處理! {Action}", name);
-
+        
         try
         {
+            // 這裡模擬在一個方法內，故意拋出一個例外異常
             throw new NullReferenceException("測試用，強制拋出例外異常");
         }
         catch (Exception ex)
         {
+            // 將例外異常寫入到日誌系統內
             _logger.LogError(ex, "已經捕捉到例外異常(Error)");
             _logger.LogCritical(ex, "已經捕捉到例外異常(Critical)");
         }
 
+        // 模擬聚合例外異常
+        AggregationException();
+
+        // 模擬內部例外異常
+        InnerException();
+
+        // 模擬非同步方法
         await MyAwaitAsync();
+
     }
 
     /// <summary>
     /// 模擬非同步方法
     /// </summary>
-    /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
     public async Task MyAwaitAsync()
     {
         await Task.Run(() =>
@@ -108,5 +116,65 @@ public class MyService
             // 這裡模擬在一個非同步方法內，故意拋出一個例外異常
             throw new ArgumentException("測試用，強制拋出例外異常");
         });
+    }
+
+    /// <summary>
+    /// 模擬聚合例外異常
+    /// </summary>
+    /// <exception cref="Exception"></exception>
+    public void AggregationException()
+    {
+        // 建立兩個會擲回例外狀況的工作
+        Task task1 = Task.Run(() =>
+        {
+            throw new Exception("This is task 1 exception");
+        });
+        Task task2 = Task.Run(() =>
+        {
+            throw new Exception("This is task 2 exception");
+        });
+        Task task3 = Task.Run(() =>
+        {
+            Thread.Sleep(1000);
+        });
+
+        // 使用 Task.WaitAll 方法等待兩個工作完成
+        try
+        {
+            Task.WaitAll(task1, task2, task3);
+        }
+        catch (AggregateException ex)
+        {
+            _logger.LogError(ex, "已經捕捉到 AggregateException 例外異常(Error)");
+            // 處理 Aggregation Exception 例外狀況
+            //foreach (Exception innerException in ex.InnerExceptions)
+            //{
+            //    Console.WriteLine(innerException.Message);
+            //}
+        }
+    }
+
+    /// <summary>
+    /// 模擬內部例外異常
+    /// </summary>
+    public void InnerException()
+    {
+        try
+        {
+            try
+            {
+                // 產生一個外層異常
+                throw new Exception("外層異常");
+            }
+            catch (Exception ex)
+            {
+                // 產生一個內層異常
+                throw new Exception("內層異常", ex);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "已經捕捉到 InnerException 例外異常(Error)");
+        }
     }
 }
