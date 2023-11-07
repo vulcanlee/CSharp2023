@@ -4,9 +4,7 @@
              x:Class="MauiOnOffNavigationPage.Views.NaviPage"
              xmlns:viewModel="clr-namespace:MauiOnOffNavigationPage.ViewModels"
              x:DataType="viewModel:NaviPageViewModel"
-             BarBackgroundColor="Red"
-                BarTextColor="White"
+             BarBackgroundColor="Red" BarTextColor="White"
              >
-
 
 </NavigationPage>
