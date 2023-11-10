@@ -17,6 +17,7 @@ internal class Program
 {
     public static void Main(string[] args)
     {
+        #region 準備相關設定要進行與雲端 MongoDB 連線用的參數與物件
         // 使用 Environment 來抓取環境變數設定的 帳號與密碼
         string MongoDBAccount = Environment.GetEnvironmentVariable("MongoDBAccount");
         string MongoDBPassword = Environment.GetEnvironmentVariable("MongoDBPassword");
@@ -45,7 +46,18 @@ internal class Program
             Console.WriteLine();
             return;
         }
+        #endregion
 
+        #region 列出所有的資料庫名稱
+        Console.WriteLine($"列出所有存在的資料庫");
+        var dbs = client.ListDatabases().ToList();
+        foreach (var item in dbs)
+        {
+            Console.WriteLine(item);
+        }
+        #endregion
+
+        #region 準備新增 Document 到資料庫的 Collection 內 (執行 100 次新增文件)
         // 宣告一個 Database Name 與 Collection Name
         var dbName = "MyCrud";
         var collectionName = "Blog";
@@ -78,6 +90,7 @@ internal class Program
         stopwatch.Stop();
         // 顯示需要耗費時間
         Console.WriteLine($"新增 100 次文件需要 {stopwatch.ElapsedMilliseconds} ms");
+        #endregion
 
         #region 一次新增100筆文件
         List<Blog> blogs = new List<Blog>();
