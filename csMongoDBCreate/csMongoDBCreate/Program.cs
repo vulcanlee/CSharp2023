@@ -1,10 +1,12 @@
 ﻿using MongoDB.Driver;
+using System.Diagnostics;
 
 namespace csMongoDBCreate;
 
 // MongoDB 的 Blog 文件資料結構
 public class Blog
 {
+    public int BlogId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public DateTime CreateAt { get; set; } = DateTime.Now;
@@ -52,26 +54,52 @@ internal class Program
         collection = client.GetDatabase(dbName)
            .GetCollection<Blog>(collectionName);
 
-        // 宣告一個 Blog 物件
-        Blog blog = new Blog
-        {
-            Title = "Hello MongoDB",
-            Content = "Hello MongoDB",
-            CreateAt = DateTime.Now,
-            UpdateAt = DateTime.Now
-        };
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Restart();
 
-        try
+        #region 每次新增一筆文件
+        for (int i = 0; i < 100; i++)
         {
+            // 宣告一個 Blog 物件
+            Blog blog = new Blog
+            {
+                BlogId = i,
+                Title = $"Hello MongoDB{i}",
+                Content = $"Hello MongoDB{i}",
+                CreateAt = DateTime.Now.AddDays(i),
+                UpdateAt = DateTime.Now.AddDays(i)
+            };
+
             // 新增一筆 Blog 資料
             collection.InsertOne(blog);
         }
-        catch (Exception e)
+        #endregion
+
+        stopwatch.Stop();
+        // 顯示需要耗費時間
+        Console.WriteLine($"新增 100 次文件需要 {stopwatch.ElapsedMilliseconds} ms");
+
+        #region 一次新增100筆文件
+        List<Blog> blogs = new List<Blog>();
+        stopwatch.Restart();
+        for (int i = 0; i < 100; i++)
         {
-            Console.WriteLine($"{e.Message}");
-            Console.WriteLine(e);
-            Console.WriteLine();
-            return;
+            // 宣告一個 Blog 物件
+            Blog blog = new Blog
+            {
+                BlogId = i,
+                Title = $"Hello MongoDB{i}",
+                Content = $"Hello MongoDB{i}",
+                CreateAt = DateTime.Now.AddDays(i),
+                UpdateAt = DateTime.Now.AddDays(i)
+            };
+            blogs.Add(blog);
+            // 新增一筆 Blog 資料
         }
+        collection.InsertMany(blogs);
+        stopwatch.Stop();
+        // 顯示需要耗費時間
+        Console.WriteLine($"一次新增 100 筆文件需要 {stopwatch.ElapsedMilliseconds} ms");
+        #endregion
     }
 }
