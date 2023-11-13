@@ -23,7 +23,8 @@ internal class Program
         string MongoDBPassword = Environment.GetEnvironmentVariable("MongoDBPassword");
 
         // 使用 MongoDB Atlas 來連線
-        var mongoUri = $"mongodb+srv://{MongoDBAccount}:{MongoDBPassword}@vulcanmongo.hptf95d.mongodb.net/?retryWrites=true&w=majority";
+        //var mongoUri = $"mongodb+srv://{MongoDBAccount}:{MongoDBPassword}@vulcanmongo.hptf95d.mongodb.net/?retryWrites=true&w=majority";
+        var mongoUri = $"mongodb://localhost:27017/?retryWrites=true&w=majority";
 
         // 宣告一個 MongoDB Client 變數
         IMongoClient client;
