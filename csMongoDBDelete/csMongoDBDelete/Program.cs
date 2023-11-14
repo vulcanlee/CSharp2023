@@ -47,7 +47,7 @@ internal class Program
         #region 建立操作 MogoDB 資料庫與Collection 物件
         // 宣告一個 Database Name 與 Collection Name
         var dbName = "MyCrud";
-        var collectionName = "BlogForUpdate";
+        var collectionName = "BlogForDelete";
 
         // 取得 MongoDB Collection
         database = client.GetDatabase(dbName);
@@ -61,14 +61,14 @@ internal class Program
         Stopwatch stopwatch = new Stopwatch();
         #endregion
 
-        #region 建立準備要進行更新用的測試文件
-        #region 一次新增 5 筆文件
+        #region 建立準備要進行刪除用的測試文件
+        #region 一次新增 10 筆文件
         Console.WriteLine();
-        await Console.Out.WriteLineAsync($"建立準備要進行更新用的測試文件");
+        await Console.Out.WriteLineAsync($"建立準備要進行刪除用的測試文件");
         stopwatch.Restart();
         List<Blog> blogs = new List<Blog>();
         stopwatch.Restart();
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 10; i++)
         {
             // 宣告一個 Blog 物件
             Blog blog = new Blog
@@ -76,9 +76,9 @@ internal class Program
                 BlogId = i,
                 Title = $"Hello MongoDB{i}",
                 Tag = $"C#",
-                Content = $"Hello MongoDB{i}",
-                CreateAt = DateTime.Now.AddDays(i),
-                UpdateAt = DateTime.Now.AddDays(i)
+                Content = $"Hello MongoDB{i%3}",
+                CreateAt = DateTime.Now.AddDays(i).Date,
+                UpdateAt = DateTime.Now.AddDays(i).Date
             };
             blogs.Add(blog);
         }
@@ -86,63 +86,90 @@ internal class Program
         collection.InsertMany(blogs);
         stopwatch.Stop();
         // 顯示需要耗費時間
-        Console.WriteLine($"一次新增 5 筆文件需要 {stopwatch.ElapsedMilliseconds} ms");
+        Console.WriteLine($"一次新增 10 筆文件需要 {stopwatch.ElapsedMilliseconds} ms");
         #endregion
         #endregion
 
-        #region 找出符合更新條件的文件，並進行更新一筆文件
+        #region 找出符合刪除條件的文件，並進行刪除一筆文件
         Console.WriteLine();
-        await Console.Out.WriteLineAsync($"找出符合更新條件的文件，並進行更新一筆文件");
+        await Console.Out.WriteLineAsync($"找出符合刪除條件的文件，並進行刪除一筆文件");
         await Console.Out.WriteLineAsync($"Collection 內的所有文件");
         var byLinqCollectionWithClass = await collection.AsQueryable().ToListAsync();
         foreach (var item in byLinqCollectionWithClass)
         {
-            Console.WriteLine($"  {item.Id} / {item.Title} / {item.Tag}");
+            Console.WriteLine($"  {item.Id} / {item.Title} / {item.Content}");
         }
 
         stopwatch.Restart();
 
-        var filter1 = Builders<Blog>.Filter.Eq(r => r.Tag, "C#");
-        var update1 = Builders<Blog>.Update.Set(x => x.Tag, "SQL");
-        var updateResult = await collection.UpdateOneAsync(filter1, update1);
+        var filter1 = Builders<Blog>.Filter.Eq(r => r.Title, "Hello MongoDB5");
+        var updateResult = await collection.DeleteOneAsync(filter1);
 
         stopwatch.Stop();
         // 顯示需要耗費時間
-        Console.WriteLine($"更新花費 {stopwatch.ElapsedMilliseconds} ms");
-        await Console.Out.WriteLineAsync($"Status : {updateResult.IsAcknowledged} / {updateResult.ModifiedCount}");
+        Console.WriteLine($"刪除花費 {stopwatch.ElapsedMilliseconds} ms");
+        await Console.Out.WriteLineAsync($"Status : {updateResult.IsAcknowledged} / {updateResult.DeletedCount}");
         await Console.Out.WriteLineAsync($"重新列出 Collection 內的所有文件");
         byLinqCollectionWithClass = await collection.AsQueryable().ToListAsync();
         foreach (var item in byLinqCollectionWithClass)
         {
-            Console.WriteLine($"  {item.Id} / {item.Title} / {item.Tag}");
+            Console.WriteLine($"  {item.Id} / {item.Title} / {item.Content}");
         }
         #endregion
 
-        #region 找出符合更新條件的文件，並進行更新多筆文件
+        #region 找出符合刪除條件的文件，並進行刪除多筆文件 使用 Builders.Filter
         Console.WriteLine();
-        await Console.Out.WriteLineAsync($"找出符合更新條件的文件，並進行更新多筆文件");
+        Console.WriteLine();
+        await Console.Out.WriteLineAsync($"找出符合刪除條件的文件，並進行刪除多筆文件 使用 Builders.Filter");
         await Console.Out.WriteLineAsync($"Collection 內的所有文件");
         byLinqCollectionWithClass = await collection.AsQueryable().ToListAsync();
         foreach (var item in byLinqCollectionWithClass)
         {
-            Console.WriteLine($"  {item.Id} / {item.Title} / {item.Tag}");
+            Console.WriteLine($"  {item.Id} / {item.Title} / {item.Content}");
         }
 
         stopwatch.Restart();
 
-        var filter2 = Builders<Blog>.Filter.Eq(r => r.Tag, "C#");
-        var update2 = Builders<Blog>.Update.Set(x => x.Tag, "XAML");
-        var updateResult2 = await collection.UpdateManyAsync(filter2, update2);
-
+        var filter2 = Builders<Blog>.Filter.Eq(r => r.Content, "Hello MongoDB2");
+        var updateResult2 = await collection.DeleteManyAsync(filter2);
         stopwatch.Stop();
         // 顯示需要耗費時間
-        Console.WriteLine($"更新花費 {stopwatch.ElapsedMilliseconds} ms");
-        await Console.Out.WriteLineAsync($"Status : {updateResult2.IsAcknowledged} / {updateResult2.ModifiedCount}");
+        Console.WriteLine($"使用 Builders.Filter 刪除花費 {stopwatch.ElapsedMilliseconds} ms");
+        await Console.Out.WriteLineAsync($"Status : {updateResult2.IsAcknowledged} / {updateResult2.DeletedCount}");
         await Console.Out.WriteLineAsync($"重新列出 Collection 內的所有文件");
         byLinqCollectionWithClass = await collection.AsQueryable().ToListAsync();
         foreach (var item in byLinqCollectionWithClass)
         {
-            Console.WriteLine($"  {item.Id} / {item.Title} / {item.Tag}");
+            Console.WriteLine($"  {item.Id} / {item.Title} / {item.Content}");
+        }
+        #endregion
+
+        #region 找出符合刪除條件的文件，並進行刪除多筆文件 使用 LINQ
+        Console.WriteLine();
+        Console.WriteLine();
+        await Console.Out.WriteLineAsync($"找出符合刪除條件的文件，並進行刪除多筆文件 使用 LINQ");
+        await Console.Out.WriteLineAsync($"Collection 內的所有文件");
+        byLinqCollectionWithClass = await collection.AsQueryable().ToListAsync();
+        foreach (var item in byLinqCollectionWithClass)
+        {
+            Console.WriteLine($"  {item.Id} / {item.Title} / {item.Content}");
+        }
+
+        stopwatch.Restart();
+
+        var updateResult21 = await collection
+            .DeleteManyAsync<Blog>(x => x.Content == "Hello MongoDB0" ||
+            x.Title == "Hello MongoDB1");
+
+        stopwatch.Stop();
+        // 顯示需要耗費時間
+        Console.WriteLine($"使用 Linq 刪除花費 {stopwatch.ElapsedMilliseconds} ms");
+        //await Console.Out.WriteLineAsync($"Status : {updateResult21.IsAcknowledged} / {updateResult21.DeletedCount}");
+        await Console.Out.WriteLineAsync($"重新列出 Collection 內的所有文件");
+        byLinqCollectionWithClass = await collection.AsQueryable().ToListAsync();
+        foreach (var item in byLinqCollectionWithClass)
+        {
+            Console.WriteLine($"  {item.Id} / {item.Title} / {item.Content}");
         }
         #endregion
         #endregion
