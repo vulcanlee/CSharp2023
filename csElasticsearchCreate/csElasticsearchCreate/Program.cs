@@ -37,11 +37,11 @@ namespace csElasticsearchCreate
             {
                 Blog blog = new Blog()
                 {
-                    BlogId = 1,
+                    BlogId = i,
                     Title = $"Nice to meet your {i}",
-                    Content = $"Hell Elasticsearch {i}",
-                    CreateAt = DateTime.Now,
-                    UpdateAt = DateTime.Now,
+                    Content = $"Hello Elasticsearch {i}",
+                    CreateAt = DateTime.Now.AddDays(i),
+                    UpdateAt = DateTime.Now.AddDays(i),    
                 };
 
                 var response = await client.IndexAsync(blog, indexName);
@@ -69,11 +69,11 @@ namespace csElasticsearchCreate
             {
                 Blog blog = new Blog()
                 {
-                    BlogId = 1,
-                    Title = $"Nice to meet your {i}",
-                    Content = $"Hell Elasticsearch {i}",
-                    CreateAt = DateTime.Now,
-                    UpdateAt = DateTime.Now,
+                    BlogId = i,
+                    Title = $"Nice to meet your (Bulk) {i}",
+                    Content = $"Hello Elasticsearch (Bulk) {i}",
+                    CreateAt = DateTime.Now.AddDays(i),
+                    UpdateAt = DateTime.Now.AddDays(i),
                 };
                 list.Add(blog);
             }
