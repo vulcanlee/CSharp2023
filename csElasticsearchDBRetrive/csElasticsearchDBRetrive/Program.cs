@@ -59,87 +59,87 @@ namespace csElasticsearchDBRetrive
 
             Stopwatch stopwatch = new Stopwatch();
 
-            //#region Term 查詢
-            //await Console.Out.WriteLineAsync("Term 查詢");
-            //stopwatch.Restart();
+            #region Term 查詢
+            await Console.Out.WriteLineAsync("Term 查詢");
+            stopwatch.Restart();
 
-            //var response = await client.SearchAsync<Blog>(s => s
-            //.Index(indexName)
-            //.From(0)
-            //.Size(10)
-            //.Query(q => q
-            //.Term(t => t.BlogId, 1)));
+            var response = await client.SearchAsync<Blog>(s => s
+            .Index(indexName)
+            .From(0)
+            .Size(10)
+            .Query(q => q
+            .Term(t => t.BlogId, 1)));
 
-            //stopwatch.Stop();
+            stopwatch.Stop();
 
-            //if (response.IsValidResponse)
-            //{
-            //    var blogs = response.Documents;
-            //    foreach (var blog in blogs)
-            //    {
-            //        await Console.Out.WriteLineAsync($"Id={blog.BlogId} / Title={blog.Title}");
-            //    }
-            //}
-            //// 顯示需要耗費時間
-            //Console.WriteLine($"查詢文件需要 {stopwatch.ElapsedMilliseconds} ms");
-            //#endregion
+            if (response.IsValidResponse)
+            {
+                var blogs = response.Documents;
+                foreach (var blog in blogs)
+                {
+                    await Console.Out.WriteLineAsync($"Id={blog.BlogId} / Title={blog.Title}");
+                }
+            }
+            // 顯示需要耗費時間
+            Console.WriteLine($"查詢文件需要 {stopwatch.ElapsedMilliseconds} ms");
+            #endregion
 
-            //#region Match 查詢
-            //await Console.Out.WriteLineAsync();
-            //await Console.Out.WriteLineAsync("Match 查詢");
-            //stopwatch.Restart();
+            #region Match 查詢
+            await Console.Out.WriteLineAsync();
+            await Console.Out.WriteLineAsync("Match 查詢");
+            stopwatch.Restart();
 
-            //var response2 = await client.SearchAsync<Blog>(s => s
-            //.Index(indexName)
-            //.From(0)
-            //.Size(10)
-            //.Query(q => q
-            //    .Match(m => m
-            //        .Field(f => f.Title)
-            //        .Query("meet"))));
+            var response2 = await client.SearchAsync<Blog>(s => s
+            .Index(indexName)
+            .From(0)
+            .Size(10)
+            .Query(q => q
+                .Match(m => m
+                    .Field(f => f.Title)
+                    .Query("meet"))));
 
-            //stopwatch.Stop();
+            stopwatch.Stop();
 
-            //if (response2.IsValidResponse)
-            //{
-            //    var blogs = response2.Documents;
-            //    foreach (var blog in blogs)
-            //    {
-            //        await Console.Out.WriteLineAsync($"Id={blog.BlogId} / Title={blog.Title}");
-            //    }
-            //}
-            //// 顯示需要耗費時間
-            //Console.WriteLine($"查詢文件需要 {stopwatch.ElapsedMilliseconds} ms");
-            //#endregion
+            if (response2.IsValidResponse)
+            {
+                var blogs = response2.Documents;
+                foreach (var blog in blogs)
+                {
+                    await Console.Out.WriteLineAsync($"Id={blog.BlogId} / Title={blog.Title}");
+                }
+            }
+            // 顯示需要耗費時間
+            Console.WriteLine($"查詢文件需要 {stopwatch.ElapsedMilliseconds} ms");
+            #endregion
 
-            //#region Range (數值) 查詢
-            //await Console.Out.WriteLineAsync();
-            //await Console.Out.WriteLineAsync("Range (數值) 查詢");
-            //stopwatch.Restart();
+            #region Range (數值) 查詢
+            await Console.Out.WriteLineAsync();
+            await Console.Out.WriteLineAsync("Range (數值) 查詢");
+            stopwatch.Restart();
 
-            //var response3 = await client.SearchAsync<Blog>(s => s
-            //.Index(indexName)
-            //.From(0)
-            //.Size(10)
-            //.Query(q => q
-            //    .Range(r => r
-            //        .NumberRange(dr=>dr.Field(f=>f.BlogId)
-            //            .Gt(90).Lt(100)
-            //        ))));
+            var response3 = await client.SearchAsync<Blog>(s => s
+            .Index(indexName)
+            .From(0)
+            .Size(10)
+            .Query(q => q
+                .Range(r => r
+                    .NumberRange(dr => dr.Field(f => f.BlogId)
+                        .Gt(90).Lt(100)
+                    ))));
 
-            //stopwatch.Stop();
+            stopwatch.Stop();
 
-            //if (response3.IsValidResponse)
-            //{
-            //    var blogs = response3.Documents;
-            //    foreach (var blog in blogs)
-            //    {
-            //        await Console.Out.WriteLineAsync($"Id={blog.BlogId} / Title={blog.Title} / CreateAt={blog.CreateAt}");
-            //    }
-            //}
-            //// 顯示需要耗費時間
-            //Console.WriteLine($"查詢文件需要 {stopwatch.ElapsedMilliseconds} ms");
-            //#endregion
+            if (response3.IsValidResponse)
+            {
+                var blogs = response3.Documents;
+                foreach (var blog in blogs)
+                {
+                    await Console.Out.WriteLineAsync($"Id={blog.BlogId} / Title={blog.Title} / CreateAt={blog.CreateAt}");
+                }
+            }
+            // 顯示需要耗費時間
+            Console.WriteLine($"查詢文件需要 {stopwatch.ElapsedMilliseconds} ms");
+            #endregion
 
             #region Range (日期) 查詢
             await Console.Out.WriteLineAsync();
@@ -161,6 +161,74 @@ namespace csElasticsearchDBRetrive
             if (response4.IsValidResponse)
             {
                 var blogs = response4.Documents;
+                foreach (var blog in blogs)
+                {
+                    await Console.Out.WriteLineAsync($"Id={blog.BlogId} / Title={blog.Title} / CreateAt={blog.CreateAt}");
+                }
+            }
+            // 顯示需要耗費時間
+            Console.WriteLine($"查詢文件需要 {stopwatch.ElapsedMilliseconds} ms");
+            #endregion
+
+            #region 邏輯查詢 OR 查詢
+            await Console.Out.WriteLineAsync();
+            await Console.Out.WriteLineAsync("邏輯查詢 OR 查詢");
+            stopwatch.Restart();
+
+            var response5 = await client.SearchAsync<Blog>(s => s
+            .Index(indexName)
+            .From(0)
+            .Size(10)
+            .Query(q => q
+                .Bool(b => b
+                .Should(sh => sh
+                    .Range(r => r
+                    .DateRange(dr => dr.Field(f => f.CreateAt)
+                        .Gte(DateTime.Now.AddDays(20)).Lte(DateTime.Now.AddDays(23))
+                    )),
+                    sh => sh
+                    .Term(t => t.BlogId, 1)
+                    ))));
+
+            stopwatch.Stop();
+
+            if (response5.IsValidResponse)
+            {
+                var blogs = response5.Documents;
+                foreach (var blog in blogs)
+                {
+                    await Console.Out.WriteLineAsync($"Id={blog.BlogId} / Title={blog.Title} / CreateAt={blog.CreateAt}");
+                }
+            }
+            // 顯示需要耗費時間
+            Console.WriteLine($"查詢文件需要 {stopwatch.ElapsedMilliseconds} ms");
+            #endregion
+
+            #region 邏輯查詢 AND 查詢
+            await Console.Out.WriteLineAsync();
+            await Console.Out.WriteLineAsync("邏輯查詢 AND 查詢");
+            stopwatch.Restart();
+
+            var response6 = await client.SearchAsync<Blog>(s => s
+            .Index(indexName)
+            .From(0)
+            .Size(10)
+            .Query(q => q
+                .Bool(b => b
+                .Must(mt => mt
+                    .Range(r => r
+                    .DateRange(dr => dr.Field(f => f.CreateAt)
+                        .Gte(DateTime.Now.AddDays(20)).Lte(DateTime.Now.AddDays(23))
+                    )),
+                    mt => mt
+                    .Term(t => t.BlogId, 1)
+                    ))));
+
+            stopwatch.Stop();
+
+            if (response6.IsValidResponse)
+            {
+                var blogs = response6.Documents;
                 foreach (var blog in blogs)
                 {
                     await Console.Out.WriteLineAsync($"Id={blog.BlogId} / Title={blog.Title} / CreateAt={blog.CreateAt}");
