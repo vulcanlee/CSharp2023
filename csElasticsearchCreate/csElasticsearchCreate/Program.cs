@@ -26,6 +26,9 @@ namespace csElasticsearchCreate
 
             string indexName = "blogs".ToLower();
 
+            // 嘗試讓 client 物件與後端 Elasticsearch 來通訊，避免第一次的延遲
+            await client.Indices.DeleteAsync(indexName);
+
             Stopwatch stopwatch = new Stopwatch();
 
             #region 每次新增一筆文件，共 100 次
