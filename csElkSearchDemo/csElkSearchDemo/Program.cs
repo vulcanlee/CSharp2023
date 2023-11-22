@@ -102,28 +102,31 @@ namespace csElkSearchDemo
             //);
             #endregion
 
+            #region 測試存在 Array 內的程式碼
+            var unique_sbu_userids = new List<string>
+            {
+                "admin", "q6501", "uhd", "d4107", "d4209",
+                "d4265", "d4806", "d4173", "d4231", "d4243"
+            };
 
+            var searchResponse = client.Search<EmrReportCustHeader>(s => s
+                .Index("emr_report_cust_header")
+                .Query(q => q
+                    .Terms(t => t
+                        .Field(f => f.erch_reportdoctorid)
+                        .Terms(unique_sbu_userids)
+                        )
+                    )
+                );
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            if (searchResponse.IsValid)
+            {
+                await Console.Out.WriteLineAsync();
+                await Console.Out.WriteLineAsync(searchResponse.DebugInformation);
+                await Console.Out.WriteLineAsync();
+            }
+            #endregion
+            
             Stopwatch stopwatch = new Stopwatch();
 
             #region 對 sbu_userid 做 DISTINCT  查詢
@@ -218,7 +221,7 @@ namespace csElkSearchDemo
             if (response7.IsValid)
             {
                 await Console.Out.WriteLineAsync();
-                await Console.Out.WriteLineAsync(response6.DebugInformation);
+                await Console.Out.WriteLineAsync(response7.DebugInformation);
                 await Console.Out.WriteLineAsync();
 
                 var documents = response7.Documents;
