@@ -84,9 +84,9 @@ namespace csElkSearchDemo
 
             #region 指定的固定參數
             string assignUserId = "admin";
-            DateTime startDate = DateTime.Parse("2023/11/14 11:33:30");
-            DateTime endDate = DateTime.Parse("2011/11/14 11:33:30");
-            DateTime SYSDATE = DateTime.Parse("2023/11/22 11:33:30");
+            DateTime SYSDATE = DateTime.Parse("2023/11/23 00:00:00");
+            DateTime startDate = SYSDATE;
+            DateTime endDate = DateTime.Parse("2018/11/23 00:00:00");
             int estType = 3;
             #endregion
 
@@ -103,30 +103,44 @@ namespace csElkSearchDemo
             #endregion
 
             #region 測試存在 Array 內的程式碼
-            var unique_sbu_userids = new List<string>
-            {
-                "admin", "q6501", "uhd", "d4107", "d4209",
-                "d4265", "d4806", "d4173", "d4231", "d4243"
-            };
+            //unique_sbu_userid = new List<string>
+            //{
+            //    "admin", "q6501", "uhd", "d4107", "d4209",
+            //    "d4265", "d4806", "d4173", "d4231", "d4243"
+            //};
 
+            //var searchResponse = client.Search<EmrReportCustHeader>(s => s
+            //    .Index("emr_report_cust_header")
+            //    .Query(q => q
+            //        .Terms(t => t
+            //            .Field(f => f.erch_reportdoctorid)
+            //            .Terms(unique_sbu_userid)
+            //            )
+            //        )
+            //    );
+
+            //if (searchResponse.IsValid)
+            //{
+            //    await Console.Out.WriteLineAsync();
+            //    //await Console.Out.WriteLineAsync(searchResponse.DebugInformation);
+            //    await Console.Out.WriteLineAsync();
+            //}
+            #endregion
+
+            #region 嘗試第一次初始連線，
             var searchResponse = client.Search<EmrReportCustHeader>(s => s
                 .Index("emr_report_cust_header")
-                .Query(q => q
-                    .Terms(t => t
-                        .Field(f => f.erch_reportdoctorid)
-                        .Terms(unique_sbu_userids)
-                        )
-                    )
+                .Size(1)
                 );
 
             if (searchResponse.IsValid)
             {
                 await Console.Out.WriteLineAsync();
-                await Console.Out.WriteLineAsync(searchResponse.DebugInformation);
+                //await Console.Out.WriteLineAsync(searchResponse.DebugInformation);
                 await Console.Out.WriteLineAsync();
             }
             #endregion
-            
+
             Stopwatch stopwatch = new Stopwatch();
 
             #region 對 sbu_userid 做 DISTINCT  查詢
@@ -137,7 +151,7 @@ namespace csElkSearchDemo
             var response6 = await client.SearchAsync<SbuUserId>(s => s
             .Index(indexSbuName)
             .From(0)
-            .Size(100)
+            .Size(6000)
             .Query(q => q
                 .Bool(b => b
                 .Must(mt => mt
@@ -156,7 +170,7 @@ namespace csElkSearchDemo
                 )
             .Aggregations(agg => agg
                 .Terms(unique_sbu_userid_name, te => te
-                    .Field(f => f.sbu_userid))
+                    .Field(f => f.sbu_userid).Size(200))
                 )
             );
 
@@ -165,7 +179,7 @@ namespace csElkSearchDemo
             if (response6.IsValid)
             {
                 await Console.Out.WriteLineAsync();
-                await Console.Out.WriteLineAsync(response6.DebugInformation);
+                //await Console.Out.WriteLineAsync(response6.DebugInformation);
                 await Console.Out.WriteLineAsync();
 
                 var document = response6.Documents;
@@ -175,12 +189,14 @@ namespace csElkSearchDemo
                     var termsAggregation = response6.Aggregations.Terms(unique_sbu_userid_name);
                     foreach (var bucket in termsAggregation.Buckets)
                     {
-                        Console.WriteLine($"Key: {bucket.Key}, Count: {bucket.DocCount}");
+                        //Console.WriteLine($"Key: {bucket.Key}, Count: {bucket.DocCount}");
                         unique_sbu_userid.Add(bucket.Key);
                     }
                 }
 
             }
+
+            Console.WriteLine($"Distinct 查詢筆數 : {unique_sbu_userid.Count}");
             // 顯示需要耗費時間
             Console.WriteLine($"查詢文件需要 {stopwatch.ElapsedMilliseconds} ms");
             #endregion
@@ -191,12 +207,28 @@ namespace csElkSearchDemo
             await Console.Out.WriteLineAsync("使用上面 Aggregation 結果，對 emr_report_cust_header 做查詢");
             stopwatch.Restart();
 
+
+
+
+            //unique_sbu_userid = new List<string>
+            //{
+            //    "admin", "q6501", "uhd", "d4107", "d4209",
+            //    "d4265", "d4806", "d4173", "d4231", "d4243"
+            //};
+
+
+
+
             var response7 = await client.SearchAsync<EmrReportCustHeader>(s => s
             .Index(indexReportCustHeaderName)
             .From(0)
-            .Size(100)
+            .Size(1000)
             .Query(q => q
                 .Bool(b => b
+                    .Should(
+                        sd => sd
+                            .Term(t => t.erch_reportdoctorid, assignUserId)
+                        )
                     .Must(
                         mt => mt
                             .DateRange(dr => dr
@@ -206,12 +238,12 @@ namespace csElkSearchDemo
                             .Term(t => t.erch_istrash, 0),
                         rdi => rdi
                             .Terms(t => t
-                                .Field(f => f.erch_reportdoctorid).Terms(unique_sbu_userid))
+                                .Field("erch_reportdoctorid").Terms(unique_sbu_userid))
                         )
                     )
                 )
             .Sort(s => s
-                .Ascending($"erch_reportcode.keyword")
+                .Ascending($"erch_id")
                 .Descending(d => d.erch_createdate)
                 )
             );
@@ -221,14 +253,14 @@ namespace csElkSearchDemo
             if (response7.IsValid)
             {
                 await Console.Out.WriteLineAsync();
-                await Console.Out.WriteLineAsync(response7.DebugInformation);
+               // await Console.Out.WriteLineAsync(response7.DebugInformation);
                 await Console.Out.WriteLineAsync();
 
                 var documents = response7.Documents;
 
                 foreach (var doc in documents)
                 {
-                    Console.WriteLine($"erch_id : {doc.erch_id} / erch_reportcode: {doc.erch_reportcode}");
+                    //Console.WriteLine($"erch_id : {doc.erch_id} / erch_reportcode: {doc.erch_reportcode}");
                 }
             }
             // 顯示需要耗費時間
