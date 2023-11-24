@@ -170,9 +170,9 @@ namespace csElkSearchDemo
                 )
             .Aggregations(agg => agg
                 .Terms(unique_sbu_userid_name, te => te
-                    .Field(f => f.sbu_userid).Size(200))
+                    .Field(f => f.sbu_userid).Size(8000))
                 )
-            );
+             );
 
             stopwatch.Stop();
 
@@ -180,6 +180,16 @@ namespace csElkSearchDemo
             {
                 await Console.Out.WriteLineAsync();
                 //await Console.Out.WriteLineAsync(response6.DebugInformation);
+                var debugInformation = response6.DebugInformation.Split("\n");
+                for (int i = 0; i < debugInformation.Length; i++)
+                {
+                    var line = debugInformation[i];
+                    if(line.Contains("# Request:") == true)
+                    {
+                        line = debugInformation[i + 1];
+                        await Console.Out.WriteLineAsync(line);
+                    }
+                }
                 await Console.Out.WriteLineAsync();
 
                 var document = response6.Documents;
@@ -187,6 +197,7 @@ namespace csElkSearchDemo
                 if (response6.Aggregations.ContainsKey(unique_sbu_userid_name))
                 {
                     var termsAggregation = response6.Aggregations.Terms(unique_sbu_userid_name);
+                    //Console.WriteLine($"搜尋筆數 : {termsAggregation.Buckets.Count}");
                     foreach (var bucket in termsAggregation.Buckets)
                     {
                         //Console.WriteLine($"Key: {bucket.Key}, Count: {bucket.DocCount}");
@@ -222,7 +233,7 @@ namespace csElkSearchDemo
             var response7 = await client.SearchAsync<EmrReportCustHeader>(s => s
             .Index(indexReportCustHeaderName)
             .From(0)
-            .Size(1000)
+            .Size(200)
             .Query(q => q
                 .Bool(b => b
                     .Should(
@@ -253,7 +264,16 @@ namespace csElkSearchDemo
             if (response7.IsValid)
             {
                 await Console.Out.WriteLineAsync();
-               // await Console.Out.WriteLineAsync(response7.DebugInformation);
+                var debugInformation = response7.DebugInformation.Split("\n");
+                for (int i = 0; i < debugInformation.Length; i++)
+                {
+                    var line = debugInformation[i];
+                    if (line.Contains("# Request:") == true)
+                    {
+                        line = debugInformation[i + 1];
+                        await Console.Out.WriteLineAsync(line);
+                    }
+                }
                 await Console.Out.WriteLineAsync();
 
                 var documents = response7.Documents;
@@ -263,7 +283,34 @@ namespace csElkSearchDemo
                     //Console.WriteLine($"erch_id : {doc.erch_id} / erch_reportcode: {doc.erch_reportcode}");
                 }
             }
+
+            #region 統計文件數量
+            var response8 = await client.CountAsync<EmrReportCustHeader>(s => s
+                .Index(indexReportCustHeaderName)
+                .Query(q => q
+                    .Bool(b => b
+                        .Should(
+                            sd => sd
+                                .Term(t => t.erch_reportdoctorid, assignUserId)
+                            )
+                        .Must(
+                            mt => mt
+                                .DateRange(dr => dr
+                                    .Field(f => f.erch_reportdate)
+                                 .LessThanOrEquals(SYSDATE)),
+                            et => et
+                                .Term(t => t.erch_istrash, 0),
+                            rdi => rdi
+                                .Terms(t => t
+                                    .Field("erch_reportdoctorid").Terms(unique_sbu_userid))
+                            )
+                        )
+                    )
+                );
+
+            #endregion
             // 顯示需要耗費時間
+            Console.WriteLine($"查詢筆數 : {response8.Count}");
             Console.WriteLine($"查詢文件需要 {stopwatch.ElapsedMilliseconds} ms");
             #endregion
         }
