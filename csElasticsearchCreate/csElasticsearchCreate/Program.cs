@@ -2,8 +2,6 @@
 using Elastic.Clients.Elasticsearch.Core.Bulk;
 using Elastic.Transport;
 using System.Diagnostics;
-using System.Reflection.Metadata;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace csElasticsearchCreate
 {
