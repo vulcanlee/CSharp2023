@@ -2,6 +2,7 @@
 using Elastic.Clients.Elasticsearch.Core.Bulk;
 using Elastic.Transport;
 using System.Diagnostics;
+using System.Reflection.Metadata;
 
 namespace csElasticsearchCreate
 {
@@ -26,6 +27,16 @@ namespace csElasticsearchCreate
 
             // 嘗試讓 client 物件與後端 Elasticsearch 來通訊，避免第一次的延遲
             await client.Indices.DeleteAsync(indexName);
+
+            // 建立 index
+            await client.IndexAsync(new Blog()
+            {
+                BlogId = 999,
+                Title = $"Nice to meet your 999",
+                Content = $"Hello Elasticsearch 999",
+                CreateAt = DateTime.Now.AddDays(999),
+                UpdateAt = DateTime.Now.AddDays(999),
+            }, indexName);
 
             Stopwatch stopwatch = new Stopwatch();
 
