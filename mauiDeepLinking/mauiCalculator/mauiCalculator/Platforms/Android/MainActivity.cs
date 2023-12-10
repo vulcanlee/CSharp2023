@@ -48,9 +48,10 @@ namespace mauiCalculator
                 await Task.Delay(1500);
 
                 string apitoken = uri.ToString().Substring(uri.ToString().LastIndexOf('=') + 1);
-                int value1 = int.Parse(apitoken);
-                int value2 = new Random().Next(9999999)+value1;
-                string uriBack = "calls://my.com/sum?value=" + value2.ToString();
+                int value1 = int.Parse(apitoken.Split("@")[0]);
+                int value2 = int.Parse(apitoken.Split("@")[1]);
+                int value3 = value1 + value2;
+                string uriBack = "calls://my.com/sum?value=" + value3.ToString();
                 Launcher.Default.OpenAsync(uriBack);
             }
         }
@@ -64,9 +65,10 @@ namespace mauiCalculator
             {
                 await Task.Delay(1500);
                 string apitoken = strLink.Substring(strLink.LastIndexOf('=') + 1);
-                int value1 = int.Parse(apitoken);
-                int value2 = new Random().Next(9999999) + value1;
-                string uriBack = "calls://my.com/sum?value=" + value2.ToString();
+                int value1 = int.Parse(apitoken.Split("@")[0]);
+                int value2 = int.Parse(apitoken.Split("@")[1]);
+                int value3 = value1 + value2;
+                string uriBack = "calls://my.com/sum?value=" + value3.ToString();
                 Launcher.Default.OpenAsync(uriBack);
             };
         }

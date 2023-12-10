@@ -39,8 +39,8 @@ namespace mauiDeepLink
 
             SemanticScreenReader.Announce(CounterBtn.Text);
 
-            int value2 = 100;
-            string uriBack = "dplcalculators://calculator.com/sum?value=" + value2.ToString();
+            string twoValue = $"{Value1.Text}@{Value2.Text}";
+            string uriBack = "dplcalculators://calculator.com/sum?value=" + twoValue;
             Launcher.Default.OpenAsync(uriBack);
 
         }

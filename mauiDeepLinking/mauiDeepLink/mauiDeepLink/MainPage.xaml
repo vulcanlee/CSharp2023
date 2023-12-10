@@ -25,6 +25,10 @@
                 SemanticProperties.HeadingLevel="Level2"
                 SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
 
+            <Entry x:Name="Value1" Keyboard="Numeric"
+                   HorizontalOptions="Fill"/>
+            <Entry x:Name="Value2" Keyboard="Numeric"
+                   HorizontalOptions="Fill"/>
             <Button
                 x:Name="CounterBtn"
                 Text="Click me" 
