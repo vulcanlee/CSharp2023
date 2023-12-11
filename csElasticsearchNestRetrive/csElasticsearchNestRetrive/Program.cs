@@ -68,9 +68,9 @@ internal class Program
         }
         #endregion
 
-        #region 取得 Title 有 3 文字之所有文件
+        #region 取得 Title 有 33 文字之所有文件
         await Console.Out.WriteLineAsync(); await Console.Out.WriteLineAsync();
-        await Console.Out.WriteLineAsync($"取得 Title 有 1003 文字之所有文件");
+        await Console.Out.WriteLineAsync($"取得 Title 有 33 文字之所有文件");
         stopwatch.Restart();
         var searchResponse3 = await client
             .SearchAsync<Blog>(s =>
@@ -95,9 +95,9 @@ internal class Program
         }
         #endregion
 
-        #region 取得 Title 有包含任何 3 文字之所有文件
+        #region 取得 Title 有包含任何 33 文字之所有文件
         await Console.Out.WriteLineAsync(); await Console.Out.WriteLineAsync();
-        await Console.Out.WriteLineAsync($"取得 Title 有包含任何 3 文字之所有文件");
+        await Console.Out.WriteLineAsync($"取得 Title 有包含任何 33 文字之所有文件");
         stopwatch.Restart();
         var searchResponse4 = await client
             .SearchAsync<Blog>(s =>
