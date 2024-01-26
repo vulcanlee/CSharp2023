@@ -1,0 +1,129 @@
+﻿<Window x:Class="csThreadPoolTesting.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:csThreadPoolTesting"
+        mc:Ignorable="d"
+        Title="觀察執行緒集區的使用 By Vulcan Lee Ver 1.0" Height="600" Width="960"
+        ResizeMode="NoResize">
+    <Window.DataContext>
+        <local:MainWindowViewModel />
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+        <Grid Background="Green">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Column="0"
+                        VerticalAlignment="Center">
+                <Label Content="執行緒集區執行緒數:" VerticalContentAlignment="Center"
+                       FontWeight="Bold" Foreground="#e9ffe3" FontSize="14"/>
+                <Label Content="{Binding ThreadCount}"
+                       Foreground="Yellow" FontSize="24" FontWeight="Bold"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Column="1"
+                        VerticalAlignment="Center">
+                <Label Content="排入佇列，待處理目數:" VerticalContentAlignment="Center"
+                       FontWeight="Bold" Foreground="#e9ffe3" FontSize="14"/>
+                <Label Content="{Binding PendingWorkItemCount}"
+                       Foreground="Yellow" FontSize="24" FontWeight="Bold"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Column="2"
+                        VerticalAlignment="Center">
+                <Label Content="已經處理完成的工作項目數:" VerticalContentAlignment="Center"
+                       FontWeight="Bold" Foreground="#e9ffe3" FontSize="14"/>
+                <Label Content="{Binding CompletedWorkItemCount}"
+                       Foreground="Yellow" FontSize="24" FontWeight="Bold"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Column="3"
+                        VerticalAlignment="Center">
+                <Label Content="執行中執行緒:" VerticalContentAlignment="Center"
+                       FontWeight="Bold" Foreground="#ffe8f8" FontSize="18"/>
+                <Label Content="{Binding CurrentRunningThreadCount}"
+                       Foreground="#ffe8f8" FontSize="24" FontWeight="Bold"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Content="10個 同步 請求" Grid.Column="0" FontSize="20" Background="LightSkyBlue"
+                    Command="{Binding Get10WorkerCommand}"/>
+            <Button Content="50個 同步 請求" Grid.Column="1" FontSize="20" Background="LightSkyBlue"
+                    Command="{Binding Get50WorkerCommand}"/>
+            <Button Content="10個 非同步 請求" Grid.Column="2" FontSize="20" Background="LightSkyBlue"
+                    Command="{Binding Get10AsyncWorkerCommand}"/>
+            <Button Content="50個 非同步 請求" Grid.Column="3" FontSize="20" Background="LightSkyBlue"
+                    Command="{Binding Get50AsyncWorkerCommand}"/>
+            <Button Content="重置計時器" Grid.Column="4" FontSize="20" Background="Black"
+                    Command="{Binding ResetTimerCommand}"
+                    Foreground="White" />
+        </Grid>
+
+        <Grid Grid.Row="2" Background="#fcf0d9">
+            
+        </Grid>
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal" Margin="0,10"
+                    VerticalAlignment="Top" HorizontalAlignment="Center"
+                    >
+            <Label Content="還在執行緒集區佇列排隊數量" Grid.Row="2"
+               VerticalAlignment="Center" HorizontalAlignment="Center"
+               FontSize="48" Foreground="OrangeRed"/>
+            <Label Content="{Binding WaitInQueue}" Grid.Row="2"
+               VerticalAlignment="Center" HorizontalAlignment="Center"
+               FontSize="60" Foreground="White" Background="Red"/>
+        </StackPanel>
+
+        <Label Content="{Binding ElapseTime}" Grid.Row="2"
+               VerticalAlignment="Center" HorizontalAlignment="Center"
+               FontSize="96" Foreground="#d6295a"/>
+
+        <Grid Grid.Row="3" Background="DarkBlue">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Column="0"
+                        VerticalAlignment="Center">
+                <Label Content="處理器數目:" VerticalContentAlignment="Center"
+                       FontWeight="Bold" Foreground="White" FontSize="18"/>
+                <Label Content="{Binding LogicalProcessorCount}"
+                       Foreground="Yellow" FontSize="20"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Column="1"
+                        VerticalAlignment="Center">
+                <Label Content="背景執行緒最小數目:" VerticalContentAlignment="Center"
+                       FontWeight="Bold" Foreground="White" FontSize="18"/>
+                <Label Content="{Binding ThreadPoolMinWorker}"
+                       Foreground="Yellow" FontSize="20"/>
+            </StackPanel>
+            <Button Content="增加背景工作執行緒最小數目" Grid.Column="2" Margin="7" 
+                    Foreground="#3857f2" Background="#b8c3ff" FontSize="14"
+                    Command="{Binding AddMoreThreadPoolMinWorkerCommand}"
+                     />
+            <Button Content="還原背景工作執行緒最小數目" Grid.Column="3" Margin="7"
+                    Foreground="#3857f2" Background="#b8c3ff" FontSize="14"
+                    Command="{Binding ResetThreadPoolMinWorkerCommand}"/>
+        </Grid>
+    </Grid>
+</Window>
